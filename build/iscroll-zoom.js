@@ -1089,8 +1089,6 @@ IScroll.prototype = {
 			that._execEvent('scrollEnd');
 		}, 400);
 
-		e.preventDefault();
-
 		if ( 'wheelDeltaX' in e ) {
 			wheelDeltaX = e.wheelDeltaX / 120;
 			wheelDeltaY = e.wheelDeltaY / 120;
@@ -1102,15 +1100,18 @@ IScroll.prototype = {
 			return;
 		}
 
-		wheelDeltaX *= 10;
-		wheelDeltaY *= 10;
+		wheelDeltaX *= 100 * this.options.invertWheelDirection;
+		wheelDeltaY *= 100 * this.options.invertWheelDirection;
+
+		if (this.options.wheelDisable == 'up' && wheelDeltaY>0) return;
+		if (this.options.wheelDisable == 'down' && wheelDeltaY<0) return;
 
 		if ( !this.hasVerticalScroll ) {
 			wheelDeltaX = wheelDeltaY;
 		}
 
-		newX = this.x + (this.hasHorizontalScroll ? wheelDeltaX * this.options.invertWheelDirection : 0);
-		newY = this.y + (this.hasVerticalScroll ? wheelDeltaY * this.options.invertWheelDirection : 0);
+		newX = this.x + (this.hasHorizontalScroll ? wheelDeltaX : 0);
+		newY = this.y + (this.hasVerticalScroll ? wheelDeltaY : 0);
 
 		if ( newX > 0 ) {
 			newX = 0;
@@ -1123,6 +1124,10 @@ IScroll.prototype = {
 		} else if ( newY < this.maxScrollY ) {
 			newY = this.maxScrollY;
 		}
+		
+		if (newX==this.x && newY==this.y) return;
+		
+		e.preventDefault();
 
 		this.scrollTo(newX, newY, 0);
 
