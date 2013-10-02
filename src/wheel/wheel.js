@@ -10,8 +10,10 @@
 	},
 
 	_wheel: function (e) {
-		if ( !this.enabled) return;
-		
+		if ( !this.enabled ) {
+			return;
+		}
+
 		var wheelDeltaX, wheelDeltaY,
 			newX, newY,
 			that = this;
@@ -33,18 +35,51 @@
 			return;
 		}
 
-		wheelDeltaX *= 100 * this.options.invertWheelDirection;
-		wheelDeltaY *= 100 * this.options.invertWheelDirection;
+		wheelDeltaX *= this.options.mouseWheelSpeed;
+		wheelDeltaY *= this.options.mouseWheelSpeed;
+		
 
 		if (this.options.wheelDisable == 'up' && wheelDeltaY>0) return;
 		if (this.options.wheelDisable == 'down' && wheelDeltaY<0) return;
+/*
+//<<<<<<< HEAD
+wheelDeltaX *= 100 * this.options.invertWheelDirection;
+		wheelDeltaY *= 100 * this.options.invertWheelDirection;
+=======
+		wheelDeltaX *= this.options.mouseWheelSpeed;
+		wheelDeltaY *= this.options.mouseWheelSpeed;
+>>>>>>> source/master*/
 
 		if ( !this.hasVerticalScroll ) {
 			wheelDeltaX = wheelDeltaY;
+			wheelDeltaY = 0;
 		}
 
-		newX = this.x + (this.hasHorizontalScroll ? wheelDeltaX : 0);
-		newY = this.y + (this.hasVerticalScroll ? wheelDeltaY : 0);
+		if ( this.options.snap ) {
+			newX = this.currentPage.pageX;
+			newY = this.currentPage.pageY;
+
+			if ( wheelDeltaX > 0 ) {
+				newX--;
+			} else if ( wheelDeltaX < 0 ) {
+				newX++;
+			}
+
+			if ( wheelDeltaY > 0 ) {
+				newY--;
+			} else if ( wheelDeltaY < 0 ) {
+				newY++;
+			}
+
+			this.goToPage(newX, newY);
+
+			return;
+		}
+
+		//newX = this.x + (this.hasHorizontalScroll ? wheelDeltaX : 0);
+		newX = this.x + (this.hasHorizontalScroll ? wheelDeltaX * this.options.invertWheelDirection : 0);
+		//newY = this.y + (this.hasVerticalScroll ? wheelDeltaY : 0);
+		newY = this.y + (this.hasVerticalScroll ? wheelDeltaY * this.options.invertWheelDirection : 0);
 
 		if ( newX > 0 ) {
 			newX = 0;

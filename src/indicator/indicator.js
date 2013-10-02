@@ -107,6 +107,10 @@ Indicator.prototype = {
 			utils.removeEvent(window, 'MSPointerUp', this);
 			utils.removeEvent(window, 'mouseup', this);
 		}
+
+		if ( this.options.defaultScrollbars ) {
+			this.wrapper.parentNode.removeChild(this.wrapper);
+		}
 	},
 
 	_start: function (e) {
@@ -118,6 +122,7 @@ Indicator.prototype = {
 		this.transitionTime(0);
 
 		this.initiated = true;
+		this.moved = false;
 		this.lastPointX	= point.pageX;
 		this.lastPointY	= point.pageY;
 
@@ -126,6 +131,8 @@ Indicator.prototype = {
 		utils.addEvent(window, 'touchmove', this);
 		utils.addEvent(window, 'MSPointerMove', this);
 		utils.addEvent(window, 'mousemove', this);
+
+		this.scroller._execEvent('scrollStart');
 	},
 
 	_move: function (e) {
@@ -133,6 +140,8 @@ Indicator.prototype = {
 			deltaX, deltaY,
 			newX, newY,
 			timestamp = utils.getTime();
+
+		this.moved = true;
 
 		deltaX = point.pageX - this.lastPointX;
 		this.lastPointX = point.pageX;
@@ -162,6 +171,27 @@ Indicator.prototype = {
 		utils.removeEvent(window, 'touchmove', this);
 		utils.removeEvent(window, 'MSPointerMove', this);
 		utils.removeEvent(window, 'mousemove', this);
+
+		if ( this.scroller.options.snap ) {
+			var snap = this.scroller._nearestSnap(this.scroller.x, this.scroller.y);
+
+			var time = this.options.snapSpeed || Math.max(
+					Math.max(
+						Math.min(Math.abs(this.scroller.x - snap.x), 1000),
+						Math.min(Math.abs(this.scroller.y - snap.y), 1000)
+					), 300);
+
+			if ( this.scroller.x != snap.x || this.scroller.y != snap.y ) {
+				this.scroller.directionX = 0;
+				this.scroller.directionY = 0;
+				this.scroller.currentPage = snap;
+				this.scroller.scrollTo(snap.x, snap.y, time, this.scroller.options.bounceEasing);
+			}
+		}
+
+		if ( this.moved ) {
+			this.scroller._execEvent('scrollEnd');
+		}
 	},
 
 	transitionTime: function (time) {
@@ -188,7 +218,7 @@ Indicator.prototype = {
 			utils.addClass(this.wrapper, 'iScrollBothScrollbars');
 			utils.removeClass(this.wrapper, 'iScrollLoneScrollbar');
 
-			if ( this.options.defaultScrollbars ) {
+			if ( this.options.defaultScrollbars && this.options.customStyle ) {
 				if ( this.options.listenX ) {
 					this.wrapper.style.right = '8px';
 				} else {
@@ -199,7 +229,7 @@ Indicator.prototype = {
 			utils.removeClass(this.wrapper, 'iScrollBothScrollbars');
 			utils.addClass(this.wrapper, 'iScrollLoneScrollbar');
 
-			if ( this.options.defaultScrollbars ) {
+			if ( this.options.defaultScrollbars && this.options.customStyle ) {
 				if ( this.options.listenX ) {
 					this.wrapper.style.right = '2px';
 				} else {
@@ -213,7 +243,7 @@ Indicator.prototype = {
 		if ( this.options.listenX ) {
 			this.wrapperWidth = this.wrapper.clientWidth;
 			if ( this.options.resize ) {
-				this.indicatorWidth = Math.max(Math.round(this.wrapperWidth * this.wrapperWidth / this.scroller.scrollerWidth), 8);
+				this.indicatorWidth = Math.max(Math.round(this.wrapperWidth * this.wrapperWidth / (this.scroller.scrollerWidth || this.wrapperWidth || 1)), 8);
 				this.indicatorStyle.width = this.indicatorWidth + 'px';
 			} else {
 				this.indicatorWidth = this.indicator.clientWidth;
@@ -225,7 +255,7 @@ Indicator.prototype = {
 		if ( this.options.listenY ) {
 			this.wrapperHeight = this.wrapper.clientHeight;
 			if ( this.options.resize ) {
-				this.indicatorHeight = Math.max(Math.round(this.wrapperHeight * this.wrapperHeight / this.scroller.scrollerHeight), 8);
+				this.indicatorHeight = Math.max(Math.round(this.wrapperHeight * this.wrapperHeight / (this.scroller.scrollerHeight || this.wrapperHeight || 1)), 8);
 				this.indicatorStyle.height = this.indicatorHeight + 'px';
 			} else {
 				this.indicatorHeight = this.indicator.clientHeight;
@@ -280,6 +310,9 @@ Indicator.prototype = {
 			y = this.maxPosY;
 		}
 
-		this.scroller.scrollTo(Math.round(x / this.sizeRatioX), Math.round(y / this.sizeRatioY));
+		x = this.options.listenX ? Math.round(x / this.sizeRatioX) : this.scroller.x;
+		y = this.options.listenY ? Math.round(y / this.sizeRatioY) : this.scroller.y;
+
+		this.scroller.scrollTo(x, y);
 	}
 };
