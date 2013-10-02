@@ -945,6 +945,12 @@ IScroll.prototype = {
 			utils.removeEvent(this.wrapper, 'DOMMouseScroll', this);
 		});
 	},
+	wheelEnable: function() {
+		this.wheelDisabled = false;
+	},
+	wheelDisable: function() {
+		this.wheelDisabled = true;
+	},
 
 	_wheel: function (e) {
 		if ( !this.enabled ) {
@@ -978,14 +984,6 @@ IScroll.prototype = {
 
 		if (this.options.wheelDisable == 'up' && wheelDeltaY>0) return;
 		if (this.options.wheelDisable == 'down' && wheelDeltaY<0) return;
-/*
-//<<<<<<< HEAD
-wheelDeltaX *= 100 * this.options.invertWheelDirection;
-		wheelDeltaY *= 100 * this.options.invertWheelDirection;
-=======
-		wheelDeltaX *= this.options.mouseWheelSpeed;
-		wheelDeltaY *= this.options.mouseWheelSpeed;
->>>>>>> source/master*/
 
 		if ( !this.hasVerticalScroll ) {
 			wheelDeltaX = wheelDeltaY;

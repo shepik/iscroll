@@ -8,6 +8,12 @@
 			utils.removeEvent(this.wrapper, 'DOMMouseScroll', this);
 		});
 	},
+	wheelEnable: function() {
+		this.wheelDisabled = false;
+	},
+	wheelDisable: function() {
+		this.wheelDisabled = true;
+	},
 
 	_wheel: function (e) {
 		if ( !this.enabled ) {
