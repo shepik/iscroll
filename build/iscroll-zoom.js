@@ -1115,6 +1115,7 @@ IScroll.prototype = {
 			utils.removeEvent(this.wrapper, 'mousewheel', this);
 			utils.removeEvent(this.wrapper, 'DOMMouseScroll', this);
 		});
+		this.wheelDisabled = false;
 	},
 	wheelEnable: function() {
 		this.wheelDisabled = false;
