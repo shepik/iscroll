@@ -1127,6 +1127,9 @@ IScroll.prototype = {
 		if ( !this.enabled ) {
 			return;
 		}
+		if (this.wheelDisabled){
+			return;
+		}
 
 		var wheelDeltaX, wheelDeltaY,
 			newX, newY,
